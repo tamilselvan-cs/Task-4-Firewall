@@ -1,0 +1,23 @@
+# Created folders
+mkdir "$env:USERPROFILE\Documents\internship-task-4"
+mkdir "$env:USERPROFILE\Documents\internship-task-4\screenshots"
+mkdir "$env:USERPROFILE\Documents\internship-task-4\outputs"
+
+# Saved inbound rules (before)
+Get-NetFirewallRule -Direction Inbound | Select DisplayName,Enabled,Profile,Action,Direction,@{n='LocalPort';e={(Get-NetFirewallPortFilter -AssociatedNetFirewallRule $_.Name).LocalPort}} | Format-Table -AutoSize | Out-File "$env:USERPROFILE\Documents\internship-task-4\outputs\windows_inbound_list_before.txt"
+
+# Add block rule (Telnet 23)
+New-NetFirewallRule -DisplayName "Internship_Block_Telnet_23" -Direction Inbound -LocalPort 23 -Protocol TCP -Action Block -Profile Any
+
+# Save rule details
+Get-NetFirewallRule -DisplayName "Internship_Block_Telnet_23" | Format-List * | Out-File "$env:USERPROFILE\Documents\internship-task-4\outputs\internship_rule_details.txt"
+
+# Export firewall backup
+netsh advfirewall export "%USERPROFILE%\Documents\internship-task-4\outputs\windows_firewall_backup.wfw"
+
+# Save all rules (human readable)
+Get-NetFirewallRule | Format-Table DisplayName,Enabled,Profile,Action,Direction,@{n='LocalPort';e={(Get-NetFirewallPortFilter -AssociatedNetFirewallRule $_.Name).LocalPort}} -AutoSize | Out-File "$env:USERPROFILE\Documents\internship-task-4\outputs\all_firewall_rules.txt"
+
+# Remove test rule (cleanup)
+Remove-NetFirewallRule -DisplayName "Internship_Block_Telnet_23"
+Get-NetFirewallRule -DisplayName "Internship_Block_Telnet_23" | Out-File "$env:USERPROFILE\Documents\internship-task-4\outputs\check_deleted_rule.txt"
